@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>阳光小剧场 · 跟读学英语 | 儿童跟读游戏</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none; /* 避免拖动文字干扰，但不影响输入 */
+        }
+        body {
+            background: linear-gradient(145deg, #f9e7b3 0%, #f5cda0 100%);
+            font-family: 'Comic Neue', 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Emoji', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        /* 主卡片 */
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: #fffef7;
+            border-radius: 80px 80px 70px 70px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.2), inset 0 1px 4px rgba(255,255,200,0.8);
+            overflow: hidden;
+            padding: 20px 24px 35px;
+            transition: all 0.2s;
+        }
+        /* 顶部太阳/植物装饰 */
+        .scene-header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .emoji-sun {
+            font-size: 58px;
+            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.2));
+            display: inline-block;
+            animation: gentleFloat 3s infinite ease;
+        }
+        @keyframes gentleFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 5px 0 0;
+            background: linear-gradient(135deg, #FFB347, #FF8C42);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            color: #c97e3a;
+            font-weight: bold;
+            font-size: 0.9rem;
+            background: #ffefcf;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+        }
+        /* 进度条 */
+        .progress-area {
+            background: #ffe1b3;
+            border-radius: 50px;
+            margin: 15px 0 12px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .step-indicator {
+            background: #ffffffcc;
+            border-radius: 40px;
+            padding: 5px 16px;
+            font-weight: bold;
+            color: #b45f2b;
+            font-size: 0.9rem;
+        }
+        .progress-bar-bg {
+            flex: 1;
+            height: 14px;
+            background: #e7c89c;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #ffaa33;
+            border-radius: 20px;
+            transition: width 0.3s ease;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        /* 剧本句子卡片 */
+        .script-card {
+            background: #fef5e3;
+            border-radius: 52px;
+            padding: 22px 24px;
+            margin: 12px 0 20px;
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.1), inset 0 1px 0 white;
+            border: 1px solid #ffddb0;
+        }
+        .sentence-en {
+            font-size: 1.55rem;
+            line-height: 1.4;
+            font-weight: 600;
+            color: #3a280f;
+            word-break: break-word;
+            margin-bottom: 12px;
+            background: #fff1e0;
+            padding: 14px 18px;
+            border-radius: 48px;
+            text-shadow: 0 1px 0 white;
+        }
+        /* 跟读区 */
+        .recite-area {
+            background: #f7e9d7;
+            border-radius: 48px;
+            padding: 15px 18px;
+            margin: 8px 0 10px;
+        }
+        .mic-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .btn-mic {
+            background: #ffcd94;
+            border: none;
+            font-size: 1.7rem;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #7a4316;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 0 #b1622c;
+            transform: translateY(-2px);
+        }
+        .btn-mic:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b1622c;
+        }
+        .btn-mic.recording {
+            background: #f5a623;
+            color: white;
+            animation: pulseMic 1s infinite;
+        }
+        @keyframes pulseMic {
+            0% { box-shadow: 0 0 0 0 #ffb347; }
+            70% { box-shadow: 0 0 0 8px rgba(255,180,71,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,180,71,0); }
+        }
+        .recognition-result {
+            background: #ffffffba;
+            border-radius: 36px;
+            padding: 10px 18px;
+            font-size: 1rem;
+            color: #5f3f1c;
+            margin-top: 10px;
+            border-left: 8px solid #ffb347;
+        }
+        .feedback-badge {
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .nav-btn {
+            background: #ffe0b5;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.1s linear;
+            flex: 1;
+            text-align: center;
+            color: #794f26;
+            box-shadow: 0 3px 0 #c2894b;
+            transform: translateY(-2px);
+        }
+        .nav-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        .nav-btn:disabled {
+            opacity: 0.5;
+            transform: translateY(0);
+            cursor: not-allowed;
+        }
+        .btn-listen {
+            background: #ffdd99;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            padding: 8px 18px;
+            border-radius: 40px;
+            margin-bottom: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        /* 可爱装饰 */
+        .plant-icon {
+            font-size: 1.3rem;
+            vertical-align: middle;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #cb8e54;
+            margin-top: 18px;
+        }
+        @media (max-width: 550px) {
+            .game-container {
+                padding: 16px;
+            }
+            .sentence-en {
+                font-size: 1.2rem;
+            }
+            .btn-mic {
+                font-size: 1.2rem;
+                padding: 8px 14px;
+            }
+        }
+        .correct-highlight {
+            background: #e1f7d5;
+            transition: background 0.2s;
+            border-left: 8px solid #7fb13b;
+        }
+        button {
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="scene-header">
+        <span class="emoji-sun">☀️🌱</span>
+        <h1>🎙️ 跟读小明星 · 阳光剧场</h1>
+        <div class="sub">✨ 听句子 → 自己读 → 看看读对了没 ✨</div>
+    </div>
+
+    <div class="progress-area">
+        <div class="step-indicator" id="stepCounter">第1 / 18句</div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="step-indicator" id="scoreBadge">⭐ 0/18</div>
+    </div>
+
+    <!-- 当前句子展示 -->
+    <div class="script-card" id="scriptCard">
+        <button class="btn-listen" id="listenSpeakerBtn">🔊 听原声朗读</button>
+        <div class="sentence-en" id="sentenceText">Hello, everyone! My name is Jenny.</div>
+        <div class="recite-area">
+            <div class="mic-label">
+                <button class="btn-mic" id="micButton">🎤 开始跟读</button>
+                <span style="font-size:0.85rem;">🎧 读完点击按钮，比对是否准确~</span>
+            </div>
+            <div class="recognition-result" id="resultArea">
+                <span class="feedback-badge">📖 等待跟读...</span> 点击话筒，读出上面的英文吧！
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" id="prevBtn">◀ 上一句</button>
+        <button class="nav-btn" id="nextBtn">下一句 ▶</button>
+    </div>
+    <footer>💡 提示：点击🎤按钮后允许麦克风权限，大声跟读~ 系统会比对相似度！正确后自动标记✅</footer>
+</div>
+
+<script>
+    // ======================= 剧本台词（按顺序分割成独立句子） =======================
+    // 按照原文自然停顿分割为18个适合小朋友跟读的单元
+    const fullScript = [
+        "Hello, everyone! My name is Jenny.",
+        "Today, I'm going to play the Sun.",
+        "I live in the sky, and I'm very bright and warm.",
+        "Every morning, I wake up and give light to the world.",
+        "Look! It's snowing so beautifully.",
+        "The garden is covered with white snow.",
+        "But there's a little plant here.",
+        "It's alone and sad.",
+        "I see it, and I want to help it become happy.",
+        "It's so cold. The snow is everywhere, and I have no friends.",
+        "I'm so sad and tired. My leaves are dry, and I can't grow.",
+        "I feel so lonely. I really want warm sunshine.",
+        "I want to be green and strong. I want to smile like the sun.",
+        "Don't be sad, little plant. I'm here with you. I'm your good friend.",
+        "I'm the Sun, and I have a lot of warmth to give you. Don't worry about the cold snow. My warmth will wrap you up, and you will feel better soon. You will grow big and strong, and you will have many friends.",
+        "Wow! Wow! So warm! Thank you so much, Sun! I feel so warm now. My leaves are not dry anymore. I'm not cold, and I'm not sad. I'm so happy! I can grow now! I will grow big and green. I will bloom beautiful flowers. Thank you, my good friend Sun!",
+        "You're welcome, my dear little plant. I'm so happy you feel better. Warmth is the best gift, and friendship is the most beautiful thing. I will come to see you every day, give you warmth and light. Let's grow together, be happy together. Let's make the garden beautiful.",
+        "Thank you everyone for watching my show! I love you all!"
+    ];
+
+    let currentIndex = 0;            // 0-17
+    let completedSentences = new Array(18).fill(false);  // 跟读成功标记
+    let totalSentences = fullScript.length;
+
+    // DOM 元素
+    const sentenceTextEl = document.getElementById('sentenceText');
+    const micButton = document.getElementById('micButton');
+    const listenSpeakerBtn = document.getElementById('listenSpeakerBtn');
+    const resultArea = document.getElementById('resultArea');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const stepCounterSpan = document.getElementById('stepCounter');
+    const progressFill = document.getElementById('progressFill');
+    const scoreBadge = document.getElementById('scoreBadge');
+
+    // 语音识别全局变量
+    let recognition = null;
+    let isListening = false;
+    let currentRecognizing = false;
+
+    // 初始化 Web Speech API (兼容性处理)
+    function initSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("您的浏览器不支持语音识别功能，请使用 Chrome, Edge 或 Safari 等现代浏览器。\n您可以手动点击「听原声」然后模仿朗读，点击下一个练习～");
+            micButton.disabled = true;
+            micButton.textContent = "🎤 不支持麦克风";
+            micButton.style.opacity = "0.6";
+            return null;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recog = new SpeechRecognition();
+        recog.continuous = false;      // 单次识别
+        recog.interimResults = false;   // 只取最终结果，更适合儿童跟读
+        recog.lang = 'en-US';           // 英文识别
+        recog.maxAlternatives = 1;
+        return recog;
+    }
+
+    // 更新界面显示当前句子及完成状态
+    function updateDisplay() {
+        const sentence = fullScript[currentIndex];
+        sentenceTextEl.innerText = sentence;
+        stepCounterSpan.innerText = `第${currentIndex+1} / ${totalSentences}句`;
+        // 更新进度条和已读数量
+        const completedCount = completedSentences.filter(v => v === true).length;
+        const percent = (completedCount / totalSentences) * 100;
+        progressFill.style.width = `${percent}%`;
+        scoreBadge.innerHTML = `⭐ ${completedCount}/${totalSentences}`;
+        
+        // 如果当前句子已经跟读成功，卡片显示小勋章风格
+        const scriptCardDiv = document.getElementById('scriptCard');
+        if (completedSentences[currentIndex]) {
+            scriptCardDiv.classList.add('correct-highlight');
+            // 在结果区域显示已完成的提示
+            if (!resultArea.innerHTML.includes('✅ 已完成')) {
+                resultArea.innerHTML = `<span class="feedback-badge">✅ 太棒了！</span> 这一句你已经跟读正确啦！点击🎤可以再练，但已记录通过。`;
+            }
+        } else {
+            scriptCardDiv.classList.remove('correct-highlight');
+            if (!isListening && !currentRecognizing) {
+                // 非录音状态恢复普通提示，不要覆盖临时信息但保留温和引导
+                if (!resultArea.innerHTML.includes('等待跟读') && !resultArea.innerHTML.includes('✅ 已完成')) {
+                    // 防止强制覆盖正在显示的识别错误消息，但如果未完成且消息陈旧可优化
+                    if(!resultArea.innerHTML.includes('识别结果') && !resultArea.innerHTML.includes('正确')){
+                        // 保持整洁不过度刷新
+                    }
+                }
+            }
+        }
+        // 更新按钮状态（边界）
+        prevBtn.disabled = (currentIndex === 0);
+        nextBtn.disabled = false;
+    }
+
+    // 朗读当前句子 (原声)
+    function speakCurrentSentence() {
+        const text = fullScript[currentIndex];
+        if (!window.speechSynthesis) {
+            alert("当前浏览器不支持语音朗读，但你可以自己模仿跟读哦！");
+            return;
+        }
+        // 避免重复叠加
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechRecognition ? new SpeechSynthesisUtterance(text) : new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85;   // 稍慢，适合儿童
+        utterance.pitch = 1.1;
+        utterance.volume = 1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 更新跟读结果区域（展示识别文本，比对）
+    function showRecognitionResult(userTranscript, isMatch, similarityPercent = 0) {
+        const currentSentence = fullScript[currentIndex];
+        if (isMatch) {
+            // 标记当前句子为已完成（如果之前未完成）
+            if (!completedSentences[currentIndex]) {
+                completedSentences[currentIndex] = true;
+                updateDisplay();  // 更新进度和星星
+            }
+            resultArea.innerHTML = `<span class="feedback-badge">✅ 读得真棒！ ✔️</span> 你说的 “${userTranscript}” 和原句很接近！ 🎉 继续下一句吧~`;
+            // 播放愉快音效或简单的鼓励(可选)
+        } else {
+            // 未通过：不改变completed标记，但展示建议
+            resultArea.innerHTML = `<span class="feedback-badge">🔄 再试试看~</span> 你说：“${userTranscript}”<br> 🌟 原句：“${currentSentence}”<br> 💪 再听一遍原声，跟着读一读，加油！`;
+        }
+    }
+
+    // 比较两个字符串的相似度 (简单的大小写归一化，去掉标点符号轻微影响，着重单词匹配)
+    function compareSentences(userText, targetText) {
+        // 标准化：去标点符号，转小写，多余空格合并
+        const normalize = (str) => {
+            return str.toLowerCase()
+                .replace(/[^\w\s']/g, ' ')   // 标点变空格
+                .replace(/\s+/g, ' ')
+                .trim();
+        };
+        const normUser = normalize(userText);
+        const normTarget = normalize(targetText);
+        
+        // 完全相等直接高分
+        if (normUser === normTarget) return { match: true, score: 100 };
+        
+        // 词级别 Jaccard 相似度 + 长度容忍 (儿童友好，单词覆盖率高即可)
+        const userWords = new Set(normUser.split(' '));
+        const targetWords = new Set(normTarget.split(' '));
+        let intersection = 0;
+        for (let w of userWords) {
+            if (targetWords.has(w)) intersection++;
+        }
+        const union = userWords.size + targetWords.size - intersection;
+        const jaccard = union === 0 ? 1 : intersection / union;
+        // 如果大部分核心单词匹配且长度差异不过分，认为通过 (阈值0.65)
+        // 同时允许短句需要更高匹配，长句宽松一些
+        let pass = false;
+        if (jaccard >= 0.68) pass = true;
+        // 额外对句子的长度差异进行小幅度宽容: 如果用户句子比目标句子长太多可能不行
+        const lenRatio = Math.min(normUser.length, normTarget.length) / Math.max(normUser.length, normTarget.length);
+        if (lenRatio > 0.55 && jaccard >= 0.62) pass = true;
+        // 针对长句子(超过15个单词) 稍微放宽
+        if (targetWords.size > 12 && jaccard >= 0.6) pass = true;
+        // 重要词包含: 比如 "sun", "plant", "warm" 等关键主题词，如果没有命中可能会降低
+        return { match: pass, score: Math.round(jaccard * 100) };
+    }
+
+    // 开始语音识别跟读
+    function startListening() {
+        if (!recognition) {
+            alert("语音识别不可用，请检查浏览器设置或使用手动模仿方式～");
+            return;
+        }
+        if (isListening) {
+            // 已经在录音中，尝试停止并识别
+            try {
+                recognition.stop();
+            } catch(e) {}
+            return;
+        }
+        // 重置之前的结果提示区为录音中
+        resultArea.innerHTML = `<span class="feedback-badge">🎙️ 录音中...</span> 请大声朗读上面的英文句子！`;
+        try {
+            recognition.start();
+            isListening = true;
+            currentRecognizing = true;
+            micButton.classList.add('recording');
+            micButton.textContent = "🔴 录音中... 点击停止";
+        } catch (error) {
+            console.error(error);
+            resultArea.innerHTML = `<span class="feedback-badge">⚠️ 启动失败</span> 请确认麦克风权限已允许，再点一次。`;
+            isListening = false;
+            micButton.classList.remove('recording');
+            micButton.textContent = "🎤 开始跟读";
+        }
+    }
+
+    function stopListeningAndRecognize() {
+        if (recognition && isListening) {
+            try {
+                recognition.stop();
+            } catch(e){}
+        }
+        // 实际上 onend 会处理结束，但确保界面恢复
+        resetMicButton();
+    }
+
+    function resetMicButton() {
+        isListening = false;
+        currentRecognizing = false;
+        micButton.classList.remove('recording');
+        micButton.textContent = "🎤 开始跟读";
+    }
+
+    // 设置识别回调
+    function setupRecognitionEvents() {
+        if (!recognition) return;
+        recognition.onresult = (event) => {
+            const lastResult = event.results[event.results.length - 1];
+            const transcript = lastResult[0].transcript;
+            // 比对当前句子
+            const targetSentence = fullScript[currentIndex];
+            const { match, score } = compareSentences(transcript, targetSentence);
+            showRecognitionResult(transcript, match, score);
+            resetMicButton();
+        };
+        recognition.onerror = (event) => {
+            console.warn("识别错误:", event.error);
+            let errorMsg = "识别失败";
+            if (event.error === 'not-allowed') errorMsg = "麦克风权限被拒绝，请允许麦克风后重试";
+            else if (event.error === 'no-speech') errorMsg = "没有检测到声音，请大声朗读~";
+            else errorMsg = `识别出错: ${event.error}`;
+            resultArea.innerHTML = `<span class="feedback-badge">❌ 哎呀</span> ${errorMsg}<br>可以点🔊听原声，然后再说一次～`;
+            resetMicButton();
+        };
+        recognition.onend = () => {
+            // 自然结束
+            if (currentRecognizing) {
+                // 如果结束时没有任何结果，可能是因为没说任何话
+                if (resultArea.innerHTML.includes("录音中...")) {
+                    resultArea.innerHTML = `<span class="feedback-badge">🎤 没听到声音</span> 请点击话筒再试一次，记得读出句子哦！`;
+                }
+            }
+            resetMicButton();
+        };
+    }
+
+    // 初始化语音
+    function init() {
+        const SpeechRecog = initSpeechRecognition();
+        if (SpeechRecog) {
+            recognition = SpeechRecog;
+            setupRecognitionEvents();
+        }
+        // 更新显示第一句
+        updateDisplay();
+        // 绑定按钮事件
+        micButton.onclick = () => {
+            if (!recognition) {
+                alert("浏览器不支持语音识别，但你可以点击喇叭听原声并自己朗读练习～");
+                return;
+            }
+            if (isListening) {
+                // 如果正在录音，停止并强制提交结果
+                stopListeningAndRecognize();
+            } else {
+                startListening();
+            }
+        };
+        listenSpeakerBtn.onclick = () => {
+            speakCurrentSentence();
+        };
+        prevBtn.onclick = () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+                // 重置跟读反馈为普通状态，但不影响已完成的标记
+                if (!completedSentences[currentIndex]) {
+                    resultArea.innerHTML = `<span class="feedback-badge">📖 等待跟读...</span> 点击话筒，读出上面的英文吧！`;
+                } else {
+                    resultArea.innerHTML = `<span class="feedback-badge">✅ 已完成！</span> 很棒，这一句你已经通过了。`;
+                }
+                // 停止任何进行中的录音
+                if (isListening) stopListeningAndRecognize();
+            }
+        };
+        nextBtn.onclick = () => {
+            if (currentIndex < totalSentences - 1) {
+                currentIndex++;
+                updateDisplay();
+                if (!completedSentences[currentIndex]) {
+                    resultArea.innerHTML = `<span class="feedback-badge">📖 等待跟读...</span> 点击话筒，读出上面的英文吧！`;
+                } else {
+                    resultArea.innerHTML = `<span class="feedback-badge">✅ 已完成！</span> 太厉害了，继续闯关吧～`;
+                }
+                if (isListening) stopListeningAndRecognize();
+            } else {
+                // 最后一首彩蛋
+                const allCompleted = completedSentences.every(v=>v===true);
+                if (allCompleted) {
+                    resultArea.innerHTML = `<span class="feedback-badge">🏆 全剧通关 🏆</span> 你完成了整场小话剧！真是阳光朗读小明星！☀️🌱🎉`;
+                } else {
+                    resultArea.innerHTML = `<span class="feedback-badge">🎭 剧本结尾啦</span> 还有句子未完成，可以回头练习，把星星集满哟！`;
+                }
+            }
+        };
+    }
+
+    init();
+</script>
+</body>
+</html>
